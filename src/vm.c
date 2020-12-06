@@ -5,7 +5,7 @@
 */
 
 #include "hal_out.h"
-#include "ioreg.h"
+#include "bsl_ioreg.h"
 #include <string.h> /* strtok */
 #include <stdlib.h> /* exit */
 
@@ -19,7 +19,7 @@
 #include "vm.h"
 
 #ifdef IORegOn
-#include "ioreg.h"
+#include "bsl_ioreg.h"
 #endif
 
 extern  u8*   mem; // Need the memory address for the loader.

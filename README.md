@@ -7,10 +7,15 @@ Should be a makefile but I'm not famaliar with c and need to focus on other thin
 `gcc -D WIN10 ./src/admin.c ./src/hal_Out.c ./src/vm.c ./src/vmstack.c  ./src/hal.c  ./src/bsl_COut.c ./src/_console.c ./src/bsl_xtoa.c -o cm`    
 
 ### VM on Target
+You will need to modify the COM and the avrdude command. Should make it possible to add parameters.
 `cd src && ./compile_to_target.bat`
 
 ### A unit
 `gcc a_unit.c -o a_unit`
+
+### Task 7
+You will need to modify the COM and the avrdude command. Should make it possible to add parameters.
+`cd src && ./testIOReg0.bat`
 
 ## Testing on host
 To run the precompiled tests do:
@@ -33,9 +38,11 @@ Now if we look at the code:
 static void COut_PutB(bool b)        { printf("%s", b ? "true" : "false"); }
 static void COut_PutX(u32  u)        { printf("%08lX", u); } // To make hex output always aligned to 8 hex digits.
 ```
-The code acts as expted, padding the hex values and priting true/false.
+The code acts as expected, padding the hex values and priting true/false.
 
 ## Other files
 The *other_files* directory has random files that were included in an anouncement about the miderm "Midterm Exam Correction completed + Files for today's lecture",
 the files for the **lecture** have the precompiled test code. There are also other files, not sure why they are there or why it was not included in the original source code. So
+
+
 
