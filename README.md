@@ -17,6 +17,7 @@ You will need to modify the COM and the avrdude command. Should make it possible
 You will need to modify the COM and the avrdude command. Should make it possible to add parameters.
 `cd src && ./testIOReg0.bat`
 
+
 ## Testing on host
 To run the precompiled tests do:
 `./test_vm.bat`
@@ -38,11 +39,11 @@ Now if we look at the code:
 static void COut_PutB(bool b)        { printf("%s", b ? "true" : "false"); }
 static void COut_PutX(u32  u)        { printf("%08lX", u); } // To make hex output always aligned to 8 hex digits.
 ```
+
 The code acts as expected, padding the hex values and priting true/false.
 
 ## Other files
 The *other_files* directory has random files that were included in an anouncement about the miderm "Midterm Exam Correction completed + Files for today's lecture",
 the files for the **lecture** have the precompiled test code. There are also other files, not sure why they are there or why it was not included in the original source code. So
-
 
 

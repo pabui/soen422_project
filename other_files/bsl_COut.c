@@ -8,56 +8,25 @@
 #include "bsl_OutDesc.h"
 #include "bsl_xtoa.h"
 
-#ifdef ARM7
-    #include <avr/io.h>
-    #include <avr/interrupt.h>
+#include <avr/io.h>
+#include <avr/interrupt.h>
 
-    #define MYUBRR 103
-    
-    
-    // Transmit a character to UART.
-    static void TxChar(char c) {
-        while (!(UCSR0A & (1<<UDRE0)));
-        UDR0 = c;
-  
-    }
+// Transmit a character to UART.
+static void TxChar(char c) {
+  // your code...
+}
 
-    // From '_console.c'
-    static void Console_Putchar(char c) { TxChar(c); }
-#endif
-
-#ifdef WIN10
-    void  Console_Putchar(char  c);
-#endif
-
+// From '_console.c'
+static void Console_Putchar(char c) { TxChar(c); }
 
 static char buf[12];    // Buffer reserved for conversion to ascii characters.
                         // Need to cover max size (12) on a "i32" (sign + 10 chars + null)
 
 static void COut_Init(void) {
-    #ifdef ARM7
   // your code...
-  
-        UBRR0H = (MYUBRR>>8);
-        UBRR0L = MYUBRR;
-
-        UCSR0C = 0x06;
-        //  UCSR0B = (1<<RXEN0);
-        UCSR0B = (1<<TXEN0)|(1<<RXEN0); 
-    #endif
 }
 
-
-static void COut_PutB(bool b) { 
-    char* t = "true";
-    char* f = "false";
-    if (b){ 
-        while (*t) Console_Putchar(*t++); }
-    else{
-        while (*f) Console_Putchar(*f++);} 
-}
-
-
+static void COut_PutB(bool b)        { Console_Putchar(b ? 'T' : 'F'); }
 static void COut_PutC(char c)        { Console_Putchar(c); }
 static void COut_PutS(const char* s) { while (*s) Console_Putchar(*s++); }
 static void COut_PutI(i32  i)        { bsl_itoa(i, buf); COut_PutS(buf); }
