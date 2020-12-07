@@ -6,6 +6,7 @@
 
 #include "hal_out.h"
 #include "bsl_ioreg.h"
+
 #include <string.h> /* strtok */
 #include <stdlib.h> /* exit */
 
