@@ -20,7 +20,8 @@ void bsl_utoa(u32 n, char* buf, int next, u8 base) {
         base = 16;
     }
 
-    if (n == 0) {
+
+    if (n == 0 && base != 16) {
         buf[next++] = '0';
     } else {
         while (f > 0) {
@@ -32,11 +33,20 @@ void bsl_utoa(u32 n, char* buf, int next, u8 base) {
                     buf[next++] = (char)(r >= 10 ? r-10+'A': r+'0');
                 foundNonzero = true;
             }
+
+            else{
+                if (base == 16)
+                    buf[next++] = '0';
+            }
+
             n -= r * f;
             f /= base;
         }
     }
+
+
     buf[next] = '\0';
+
 }
 
 /* Converts 32-bit signed integer to a buffer. Base is 10 by default. */

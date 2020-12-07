@@ -7,7 +7,6 @@ Should be a makefile but I'm not famaliar with c and need to focus on other thin
 `gcc -D WIN10 ./src/admin.c ./src/hal_Out.c ./src/vm.c ./src/vmstack.c  ./src/hal.c  ./src/bsl_COut.c ./src/_console.c ./src/bsl_xtoa.c -o cm`    
 
 ### VM on Target
-
 You will need to modify the COM and the avrdude command. Should make it possible to add parameters.
 `cd src && ./compile_to_target.bat`
 
