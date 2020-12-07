@@ -47,7 +47,17 @@ static void COut_Init(void) {
     #endif
 }
 
-static void COut_PutB(bool b)        { Console_Putchar(b ? 'T' : 'F'); }
+static void COut_PutB(bool b) { 
+    char* t = "true";
+    char* f = "false";
+    if (b){ 
+        while (*t) Console_Putchar(*t++); }
+    else{
+        while (*f) Console_Putchar(*f++);} 
+}
+
+// static void COut_PutB(bool b)        { Console_Putchar(b ? 'T' : 'F'); }
+
 static void COut_PutC(char c)        { Console_Putchar(c); }
 static void COut_PutS(const char* s) { while (*s) Console_Putchar(*s++); }
 static void COut_PutI(i32  i)        { bsl_itoa(i, buf); COut_PutS(buf); }
