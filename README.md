@@ -4,7 +4,11 @@
 Should be a makefile but I'm not famaliar with c and need to focus on other things.
 
 ### VM on Host
-`gcc ./src/admin.c ./src/out.c  ./src/vm.c ./src/vmstack.c  ./src/hal.c  ./src/_cout.c ./src/_console.c ./src/_xtoa.c -o cm`
+`gcc -D WIN10 ./src/admin.c ./src/hal_Out.c ./src/vm.c ./src/vmstack.c  ./src/hal.c  ./src/bsl_COut.c ./src/_console.c ./src/bsl_xtoa.c -o cm`    
+
+### VM on Target
+`cd src && ./compile_to_target.bat`
+
 
 ### A unit
 `gcc a_unit.c -o a_unit`

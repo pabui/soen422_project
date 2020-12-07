@@ -6,20 +6,24 @@
 //
 */
 
-#include <stdio.h>  /* for FILE   */
-#include <string.h> /* for strtok */
+
 
 #include "hal.h"
-#include "out.h"
+#include "hal_Out.h"
 #include "vm.h"
 
 #ifdef Dos16
 #define Target      "(Dos16)"
-#elif defined(Arm7)
+#endif
+#ifdef ARM7
 #define Target      "(Arm7)"
+#endif
+#ifdef WIN10
+#define Target      "(Win10)"
 #else
 #define Target      "(Win32)"
 #endif
+
 
 #if LaterForSoen422SerialLoader
 #include "IStream.h"
@@ -49,7 +53,8 @@ static void Usage() {
 #define MemMax        4096
 #define MemAllocated  (4096+1024)
 /*public*/  u8*    mem;
-/*public*/  u8     memAllocated[MemAllocated];
+/*public*/  u8     memAllocated[500]; //TODO find a number that works, 4096 breaks on the atmega
+
 
 // To get the base RAM address on a memory segment increment.
 static u8* GetBaseAddr(u8* memAddr, u32 memInc) {
@@ -63,37 +68,9 @@ static u8* GetBaseAddr(u8* memAddr, u32 memInc) {
     return (u8*)r;
 }
 
-FILE* file;
-
-/* 1st two bytes are the size (msb:lsb) */
-static bool loadObjFile(FILE* f, u16 maxSize) {
-    u16 n, size;
-    u8  buf[2];
-
-    buf[0] = (u8)fgetc(f);             // Read size.msb
-    buf[1] = (u8)fgetc(f);             // Read size.msb
-    size = (u16)((buf[0] << 8) | buf[1]);
-
-//t VMOut_PutS("loadObjFile of size = %u\n", (u32)size);
-
-    if (size <= maxSize) {
-        for (n = 0; n < size; n++) {
-            mem[n] = (u8)fgetc(f);
-#ifdef MONITOR
-            VMOut_PutS(".");
-            VMOut_PutS("%02x ", (u8)mem[n]);
-#endif
-        }
-    } else {
-        VMOut_PutS("Executable file too big (should be <= "); VMOut_PutU((u32)maxSize); VMOut_PutS(" bytes).\n");
-        return false;
-    }
-    fclose(f);
-#ifdef MONITOR
-    System_putc('\n'); System_putu(size); System_puts(" bytes loaded.\n");
-#endif
-    return true;
-}
+#ifdef WIN10
+#include <stdio.h>  /* for FILE   */
+#include <string.h> /* for strtok */
 
 // Returns the filename extention.
 const char *GetFilenameExt(const char *filename) {
@@ -115,81 +92,142 @@ const char *GetFileName(const char *path) {
     return pfile;
 }
 
-int main(int argc, char* argv[]) {
-    char  filename[200]; // On Win32, you need a big buffer because in VS IDE filenames are passed with full path.
-    const char* name;
-    const char* ext;
-    int   i = 1;
 
-//t VMOut_PutS("argv[0] = [%s]\n", argv[0]);
-//t VMOut_PutS("argv[1] = [%s]\n", argv[1]);
+FILE* file;
 
-    // Do Hal_Init() before any option messages.
-    Hal_Init();
+/* 1st two bytes are the size (msb:lsb) */
+    static bool loadObjFile(FILE* f, u16 maxSize) {
+        u16 n, size;
+        u8  buf[2];
 
-    // ********* Important to adjust memory before loading the file in memory.
-//t    VMOut_PutS("GetBaseAddr(): sizeof u8* = "); VMOut_PutI((i32)sizeof(u8*)); VMOut_PutN();
-//t    VMOut_PutS("GetBaseAddr(): sizeof u32 = "); VMOut_PutI((i32)sizeof(u32)); VMOut_PutN();
+        buf[0] = (u8)fgetc(f);             // Read size.msb
+        buf[1] = (u8)fgetc(f);             // Read size.msb
+        size = (u16)((buf[0] << 8) | buf[1]);
 
-    mem = GetBaseAddr(memAllocated, (u32)1024UL);
-//t    VMOut_PutS("Admin: memAllocated = "); VMOut_PutX((u32)memAllocated); VMOut_PutN();
-//t    VMOut_PutS("Admin: mem          = "); VMOut_PutX((u32)mem); VMOut_PutN();
+    //t VMOut_PutS("loadObjFile of size = %u\n", (u32)size);
 
-    /* Parse options */
-    for (; i < argc; i++) {
-        if ( (strcmp(argv[i], "-?") == 0) || (strcmp(argv[i], "-help") == 0) ) {
-            Usage();
-            return 0;
-        } else if (strcmp(argv[i], "-v") == 0) {
-            DisplayBanner();
-            return 0;
-        } else {
-            break;
+        if (size <= maxSize) {
+            for (n = 0; n < size; n++) {
+                mem[n] = (u8)fgetc(f);
+            #ifdef MONITOR
+                        VMOut_PutS(".");
+                        VMOut_PutS("%02x ", (u8)mem[n]);
+            #endif
+            }
+        } 
+        else {
+            VMOut_PutS("Executable file too big (should be <= "); VMOut_PutU((u32)maxSize); VMOut_PutS(" bytes).\n");
+            return false;
         }
+        fclose(f);
+        #ifdef MONITOR
+            System_putc('\n'); System_putu(size); System_puts(" bytes loaded.\n");
+        #endif
+        return true;
     }
 
-    /* Parse file */
-    if (i == argc-1) {
-        char *pfile;
+    int main(int argc, char* argv[]) {
+       
+          
+        char  filename[200]; // On Win32, you need a big buffer because in VS IDE filenames are passed with full path.
+        const char* name;
+        const char* ext;
+        int   i = 1;
+        
+    //t VMOut_PutS("argv[0] = [%s]\n", argv[0]);
+    //t VMOut_PutS("argv[1] = [%s]\n", argv[1]);
 
-        strcpy(filename, argv[i]);   /* save name and extension */
-//t        VMOut_PutS("Parse file: Filename: '%s'\n", filename);
+        // Do Hal_Init() before any option messages.
+        Hal_Init();
 
-        name = GetFileName(filename);
-        ext  = GetFilenameExt(filename);
-        strcpy(filename, name);
+        // ********* Important to adjust memory before loading the file in memory.
+    //t    VMOut_PutS("GetBaseAddr(): sizeof u8* = "); VMOut_PutI((i32)sizeof(u8*)); VMOut_PutN();
+    //t    VMOut_PutS("GetBaseAddr(): sizeof u32 = "); VMOut_PutI((i32)sizeof(u32)); VMOut_PutN();
 
-//t        VMOut_PutS("Filename: '%s' Name: '%s' Ext: '%s':\n", filename, name, ext);
-
-        if (ext && (strcmp(ext, "exe") == 0)) {  /* 3 characters extension maximum */
-            char pb[50];
-
-            strcpy(pb, "");
-            pfile = strcat(pb, filename);
-
-//t            VMOut_PutS("fopen: Filename: '%s'\n", pfile);
-
-            file = fopen(pfile, "rb" );
-            if (file == NULL) {
-                VMOut_PutS(filename); VMOut_PutS(" does not exist.\n");
-                return -1;
+        mem = GetBaseAddr(memAllocated, (u32)1024UL);
+    //t    VMOut_PutS("Admin: memAllocated = "); VMOut_PutX((u32)memAllocated); VMOut_PutN();
+    //t    VMOut_PutS("Admin: mem          = "); VMOut_PutX((u32)mem); VMOut_PutN();
+            
+/* Parse options */
+        for (; i < argc; i++) {
+            if ( (strcmp(argv[i], "-?") == 0) || (strcmp(argv[i], "-help") == 0) ) {
+                Usage();
+                return 0;
+            } 
+            else if (strcmp(argv[i], "-v") == 0) {
+                DisplayBanner();
+                return 0;
+            } 
+            else {
+                break;
             }
+        }  
 
-            if (!loadObjFile(file, MemMax)) { // not a success because too big
-                return -2;
+        /* Parse file */
+        if (i == argc-1) {
+            char *pfile;
+
+            strcpy(filename, argv[i]);   /* save name and extension */
+    //t        VMOut_PutS("Parse file: Filename: '%s'\n", filename);
+
+            name = GetFileName(filename);
+            ext  = GetFilenameExt(filename);
+            strcpy(filename, name);
+
+    //t        VMOut_PutS("Filename: '%s' Name: '%s' Ext: '%s':\n", filename, name, ext);
+
+            if (ext && (strcmp(ext, "exe") == 0)) {  /* 3 characters extension maximum */
+                char pb[50];
+
+                strcpy(pb, "");
+                pfile = strcat(pb, filename);
+
+    //t            VMOut_PutS("fopen: Filename: '%s'\n", pfile);
+
+                file = fopen(pfile, "rb" );
+                if (file == NULL) {
+                    VMOut_PutS(filename); VMOut_PutS(" does not exist.\n");
+                    return -1;
+                }
+
+                if (!loadObjFile(file, MemMax)) { // not a success because too big
+                    return -2;
+                }
+            } else {
+                VMOut_PutS("Error: Must have a file with '.exe' extension.\n");
+                Usage();
+                return -3;
             }
         } else {
-            VMOut_PutS("Error: Must have a file with '.exe' extension.\n");
+            VMOut_PutS("Error: Must have a file to load.\n");
             Usage();
-            return -3;
+            return -4;
         }
-    } else {
-        VMOut_PutS("Error: Must have a file to load.\n");
-        Usage();
-        return -4;
+        VM_Init(mem);        
+        VM_execute(mem);
+        return 0;
     }
+#endif
 
-    VM_Init(mem);
-    VM_execute(mem);
-    return 0;
-}
+#ifdef ARM7
+    int main(int argc, char* argv[]) {
+        Hal_Init();
+        DisplayBanner();
+            
+        mem = GetBaseAddr(memAllocated, (u8)1024UL);        
+
+        VMOut_PutS("Set preloaded \n");
+        u8 mem[]= { 0xE1, 0x00, 0x25, 0x71, 0xD5, 0x00, 0x2F, 0xFF, 0x85, 0xD5, 0x00, 0x44, 0xFF, 0x85,
+                    0xD9, 0x09, 0xA8, 0xE0, 0x0E, 0xA0, 0x90, 0x1C, 0xE3, 0x04, 0xE0, 0x09, 0xA0, 0xB4, 0x00, 0xFF,
+                    0x82, 0xE0, 0xF4, 0xFF, 0x87, 0x03, 0x04, 0xE7, 0xFF, 0xFF, 0xE7, 0xFF, 0xDB, 0x00, 0x54, 0x2E,
+                    0x53, 0x74, 0x6D, 0x74, 0x00, 0x54, 0x65, 0x73, 0x74, 0x20, 0x31, 0x31, 0x3A, 0x20, 0x62, 0x72,
+                    0x65, 0x61, 0x6B, 0x20, 0x53, 0x74, 0x61, 0x74, 0x65, 0x6D, 0x65, 0x6E, 0x74, 0x0A, 0x00, 0x39,
+                    0x38, 0x37, 0x36, 0x35, 0x34, 0x33, 0x32, 0x31, 0x30, 0x0A, 0x00 };
+                      
+        // u8 mem[] = { 0x91, 0xFF, 0x82, 0x00 };
+    
+        VM_Init(mem);
+        VM_execute(mem);
+        return 0;
+    }
+#endif 

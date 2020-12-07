@@ -4,10 +4,10 @@
 //
 */
 
-#include "_xtoa.h"
+#include "bsl_xtoa.h"
 
 /* Converts 32-bit unsigned integer to a buffer. Base is 16 by default. */
-void _utoa(u32 n, char* buf, int next, u8 base) {
+void bsl_utoa(u32 n, char* buf, int next, u8 base) {
     u32  r, f;
     bool foundNonzero = false;
 
@@ -40,11 +40,11 @@ void _utoa(u32 n, char* buf, int next, u8 base) {
 }
 
 /* Converts 32-bit signed integer to a buffer. Base is 10 by default. */
-void System_itoa(i32 i, char* buf) {
+void bsl_itoa(i32 i, char* buf) {
     int  next = 0;
     if (i < 0L) {
         buf[next++] = '-';
         i = -i;
     }
-    _utoa(i, buf, next, 10);
+    bsl_utoa(i, buf, next, 10);
 }

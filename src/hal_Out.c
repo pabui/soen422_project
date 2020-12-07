@@ -4,8 +4,8 @@
 //
 */
 
-#include "_outdesc.h"
-#include "out.h"
+#include "bsl_OutDesc.h"
+#include "hal_out.h"
 
 static IOut vmOut;
 
